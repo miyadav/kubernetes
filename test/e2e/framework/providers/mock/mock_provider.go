@@ -16,19 +16,20 @@ limitations under the License.
 
 package mock
 
-import "k8s.io/kubernetes/cloudprovider"
+import (
+        "k8s.io/kubernetes/test/e2e/framework"
+)
 
-// MockProvider implements cloudprovider.Interface for testing purposes.
-type MockProvider struct{}
-
-func (m *MockProvider) Initialize(clientBuilder cloudprovider.ControllerClientBuilder, stop <-chan struct{}) {}
-func (m *MockProvider) LoadBalancer() (cloudprovider.LoadBalancer, bool) { return nil, false }
-func (m *MockProvider) Instances() (cloudprovider.Instances, bool)       { return nil, false }
-func (m *MockProvider) Zones() (cloudprovider.Zones, bool)               { return nil, false }
-// Add other interface methods as needed
-
-// NewMockProvider creates a new instance of MockProvider.
-func NewMockProvider() *MockProvider {
-    return &MockProvider{}
+func init() {
+        framework.RegisterProvider("mock", newProvider)
 }
+
+func newProvider() (framework.ProviderInterface, error) {
+        return &Provider{}, nil
+}
+
+type Provider struct {
+        framework.NullProvider
+}
+
 
