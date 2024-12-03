@@ -16,7 +16,17 @@ limitations under the License.
 
 package cloud
 
-import "k8s.io/kubernetes/test/e2e/framework"
+import (
+	"k8s.io/kubernetes/test/e2e/framework"
+	mockprovider "k8s.io/kubernetes/test/e2e/mockprovider"
+)
 
-// SIGDescribe annotates the test with the SIG label.
 var SIGDescribe = framework.SIGDescribe("cloud-provider")
+
+func init() {
+	mockProviderFactory := func(config framework.TestContextType) (framework.ProviderInterface, error) {
+		return mockprovider.NewMockProvider(config), nil
+	}
+
+	framework.RegisterProvider("mock", mockProviderFactory)
+}

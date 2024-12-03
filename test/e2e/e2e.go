@@ -181,6 +181,11 @@ func setupSuite(ctx context.Context) {
 	case "gce", "gke":
 		logClusterImageSources()
 	}
+	if framework.TestContext.Provider == "mock" {
+		framework.Logf("Using mock provider for testing")
+		mockProvider := mockprovider.NewMockProvider(framework.TestContext)
+		framework.SetMockProvider(mockProvider)
+	}
 
 	c, err := framework.LoadClientset()
 	framework.ExpectNoError(err, "Error loading client")
