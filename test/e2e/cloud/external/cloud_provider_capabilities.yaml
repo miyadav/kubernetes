@@ -1,0 +1,17 @@
+# cloud_provider_capabilities.yaml
+providers:
+  - name: "mock"
+    capabilities:
+      - "delete_node"
+      - "create_cluster"
+      - "delete_cluster"
+  - name: "aws"
+    capabilities:
+      - "delete_node"
+      - "create_cluster"
+      - "delete_cluster"
+  - name: "gcp"
+    capabilities:
+      - "delete_node"
+      - "create_cluster"
+      - "delete_cluster"

@@ -64,6 +64,9 @@ func init() {
 	RegisterProvider("skeleton", func() (ProviderInterface, error) {
 		return NullProvider{}, nil
 	})
+	RegisterProvider("mockprovider", func() (ProviderInterface, error) {
+		return NullProvider{}, nil
+	})
 	// The empty string used to be accepted in the past, but is not
 	// a valid value anymore.
 }
