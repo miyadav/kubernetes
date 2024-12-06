@@ -66,6 +66,9 @@ func init() {
 	})
 	// The empty string used to be accepted in the past, but is not
 	// a valid value anymore.
+	RegisterProvider("mockprovider", func() (ProviderInterface, error) {
+		return NullProvider{}, nil
+	})
 }
 
 // SetupProviderConfig validates the chosen provider and creates
