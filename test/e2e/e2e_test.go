@@ -51,6 +51,7 @@ import (
 	_ "k8s.io/kubernetes/test/e2e/auth"
 	_ "k8s.io/kubernetes/test/e2e/autoscaling"
 	_ "k8s.io/kubernetes/test/e2e/cloud"
+	_ "k8s.io/kubernetes/test/e2e/cloud/external"
 	_ "k8s.io/kubernetes/test/e2e/common"
 	_ "k8s.io/kubernetes/test/e2e/dra"
 	_ "k8s.io/kubernetes/test/e2e/instrumentation"
