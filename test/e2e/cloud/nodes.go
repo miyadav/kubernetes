@@ -18,6 +18,7 @@ package cloud
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	v1 "k8s.io/api/core/v1"
@@ -27,12 +28,42 @@ import (
 	"k8s.io/kubernetes/test/e2e/feature"
 	"k8s.io/kubernetes/test/e2e/framework"
 	e2enode "k8s.io/kubernetes/test/e2e/framework/node"
-	e2eskipper "k8s.io/kubernetes/test/e2e/framework/skipper"
 	admissionapi "k8s.io/pod-security-admission/api"
 
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
+
+// CloudProviderNodeDeleter defines an interface for deleting a node from the cloud provider.
+type CloudProviderNodeDeleter interface {
+	DeleteNode(ctx context.Context, node *v1.Node) error
+}
+
+// deleteNodeOnCloudProvider deletes a node using the cloud provider interface.
+func deleteNodeOnCloudProvider(ctx context.Context, node *v1.Node) error {
+	provider := framework.TestContext.CloudConfig.Provider
+	if provider == nil {
+		framework.Failf("Cloud provider is not configured. New providers must implement DeleteNode")
+		return fmt.Errorf("cloud provider is not configured")
+	}
+
+	// Check if provider supports DeleteNode(ctx, node) (new cloud providers)
+	if deleter, ok := provider.(interface {
+		DeleteNode(context.Context, *v1.Node) error
+	}); ok {
+		return deleter.DeleteNode(ctx, node)
+	}
+
+	// Fallback for AWS/GKE implementations using DeleteNode(node) (legacy behavior)
+	if legacyDeleter, ok := provider.(interface {
+		DeleteNode(*v1.Node) error
+	}); ok {
+		return legacyDeleter.DeleteNode(node)
+	}
+
+	framework.Failf("Cloud provider does not support DeleteNode method")
+	return fmt.Errorf("cloud provider does not support DeleteNode method")
+}
 
 var _ = SIGDescribe(feature.CloudProvider, framework.WithDisruptive(), "Nodes", func() {
 	f := framework.NewDefaultFramework("cloudprovider")
@@ -40,9 +71,6 @@ var _ = SIGDescribe(feature.CloudProvider, framework.WithDisruptive(), "Nodes", 
 	var c clientset.Interface
 
 	ginkgo.BeforeEach(func() {
-		// Only supported in AWS/GCE because those are the only cloud providers
-		// where E2E test are currently running.
-		e2eskipper.SkipUnlessProviderIs("aws", "gce")
 		c = f.ClientSet
 	})
 
@@ -57,28 +85,24 @@ var _ = SIGDescribe(feature.CloudProvider, framework.WithDisruptive(), "Nodes", 
 			framework.Logf("Unexpected error occurred: %v", err)
 		}
 		framework.ExpectNoErrorWithOffset(0, err)
-
 		framework.Logf("Original number of ready nodes: %d", len(origNodes.Items))
 
-		err = deleteNodeOnCloudProvider(nodeToDelete)
+		// Delete the node using the cloud provider-specific implementation
+		err = deleteNodeOnCloudProvider(ctx, nodeToDelete)
 		if err != nil {
 			framework.Failf("failed to delete node %q, err: %q", nodeToDelete.Name, err)
 		}
 
+		// Verify the node is removed from Kubernetes API server
 		newNodes, err := e2enode.CheckReady(ctx, c, len(origNodes.Items)-1, 5*time.Minute)
 		framework.ExpectNoError(err)
 		gomega.Expect(newNodes).To(gomega.HaveLen(len(origNodes.Items) - 1))
+
 		_, err = c.CoreV1().Nodes().Get(ctx, nodeToDelete.Name, metav1.GetOptions{})
 		if err == nil {
 			framework.Failf("node %q still exists when it should be deleted", nodeToDelete.Name)
 		} else if !apierrors.IsNotFound(err) {
 			framework.Failf("failed to get node %q err: %q", nodeToDelete.Name, err)
 		}
-
 	})
 })
-
-// DeleteNodeOnCloudProvider deletes the specified node.
-func deleteNodeOnCloudProvider(node *v1.Node) error {
-	return framework.TestContext.CloudConfig.Provider.DeleteNode(node)
-}
