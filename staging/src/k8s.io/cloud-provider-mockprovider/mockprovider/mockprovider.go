@@ -19,7 +19,7 @@ func (m *MockCloud) Initialize(clientBuilder cloudprovider.ControllerClientBuild
 
 func (m *MockCloud) LoadBalancer() (cloudprovider.LoadBalancer, bool) { return nil, false }
 
-func (m *MockCloud) Instances() (cloudprovider.Instances, bool) { return &MockInstances{}, true }
+//func (m *MockCloud) Instances() (cloudprovider.Instances, bool) { return &MockInstances{}, true }
 
 func (m *MockCloud) InstancesV2() (cloudprovider.InstancesV2, bool) { return &MockInstancesV2{}, true }
 
@@ -83,7 +83,7 @@ func (m *MockInstancesV2) InstanceShutdown(ctx context.Context, node *v1.Node) (
 
 func (m *MockInstancesV2) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloudprovider.InstanceMetadata, error) {
 	return &cloudprovider.InstanceMetadata{
-		ProviderID:    "mock://" + node.Name,
+		ProviderID:    "mocker://" + node.Name,
 		InstanceType:  "mock-instance-type",
 		NodeAddresses: []v1.NodeAddress{},
 		Zone:          "mock-zone",

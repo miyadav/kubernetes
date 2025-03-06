@@ -4,6 +4,11 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"context"
+
+	"k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/cloud-provider"
 	. "k8s.io/kubernetes/staging/src/k8s.io/cloud-provider-mockprovider/mockprovider"
 	"k8s.io/kubernetes/test/e2e/cloud"
 )
@@ -68,6 +73,22 @@ func (m *MockCloudProvider) ServiceTests() (func() error, bool) {
 	}, true
 }
 
+func (m *MockCloudProvider) InstanceMetadata() (func(node *v1.Node) (*cloudprovider.InstanceMetadata, error), bool) {
+	return func(node *v1.Node) (*cloudprovider.InstanceMetadata, error) {
+		instanceMetadata, err := (&MockInstancesV2{}).InstanceMetadata(context.TODO(), node)
+		if err != nil {
+			return nil, err
+		}
+		return &cloudprovider.InstanceMetadata{
+			ProviderID:    instanceMetadata.ProviderID,
+			InstanceType:  instanceMetadata.InstanceType,
+			NodeAddresses: instanceMetadata.NodeAddresses,
+			Zone:          instanceMetadata.Zone,
+			Region:        instanceMetadata.Region,
+		}, nil
+	}, true
+}
+
 var _ = Describe("Cloud Provider CCM Tests", func() {
 	var provider *MockCloudProvider
 	nodes := []string{"node1", "node2"}
@@ -98,5 +119,19 @@ var _ = Describe("Cloud Provider CCM Tests", func() {
 
 	It("should verify pod count successfully", func() {
 		Expect(func() { cloud.TestVerifyPodCount(provider) }).ShouldNot(Panic())
+	})
+
+	It("should validate InstanceMetadata values", func() {
+		node := &v1.Node{ObjectMeta: metav1.ObjectMeta{Name: "test-node"}}
+		instanceMetadataFunc, supported := provider.InstanceMetadata()
+		Expect(supported).To(BeTrue())
+
+		metadata, err := instanceMetadataFunc(node)
+		Expect(err).NotTo(HaveOccurred())
+		//Test fails here due to metadata comparision node being like mocker://...
+		Expect(metadata.ProviderID).To(Equal("mock://test-node"))
+		Expect(metadata.InstanceType).To(Equal("mock-instance-type"))
+		Expect(metadata.Zone).To(Equal("mock-zone"))
+		Expect(metadata.Region).To(Equal("mock-region"))
 	})
 })
