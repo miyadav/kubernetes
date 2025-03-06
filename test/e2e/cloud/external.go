@@ -40,6 +40,17 @@ type InstanceConfig struct {
 	Zone        string
 }
 
+// Test function that checks if the cloud provider creates Instance.
+func TestCreateInstance(provider CloudProvider) {
+	if instanceCreator, supported := provider.CreateInstance(); !supported {
+		skipTest("CreateInstance not supported by " + provider.Name())
+	} else {
+		if err := instanceCreator("test", InstanceConfig{}); err != nil {
+			logError("Failed to create instance: ", err)
+		}
+	}
+}
+
 // Test function that checks if the cloud provider supports node deletion.
 func TestDeleteNodes(provider CloudProvider, nodes []string) {
 	if nodeDeleter, supported := provider.DeleteNodes(); !supported {

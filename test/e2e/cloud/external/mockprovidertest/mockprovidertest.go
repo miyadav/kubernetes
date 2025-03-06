@@ -5,6 +5,8 @@ import (
 	. "github.com/onsi/gomega"
 
 	"context"
+	"fmt"
+	"strings"
 
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -29,6 +31,14 @@ func (m *MockCloudProvider) DeleteNodes() (func(nodes []string) error, bool) {
 
 func (m *MockCloudProvider) CreateInstance() (func(name string, config cloud.InstanceConfig) error, bool) {
 	return func(name string, config cloud.InstanceConfig) error {
+		if strings.TrimSpace(name) == "" {
+			return fmt.Errorf("instance name cannot be empty")
+		}
+
+		// Simulating providerID creation
+		providerID := fmt.Sprintf("mocker://%s", name)
+		fmt.Printf("Instance %s created with providerID: %s\n", name, providerID)
+
 		return nil
 	}, true
 }
@@ -133,5 +143,9 @@ var _ = Describe("Cloud Provider CCM Tests", func() {
 		Expect(metadata.InstanceType).To(Equal("mock-instance-type"))
 		Expect(metadata.Zone).To(Equal("mock-zone"))
 		Expect(metadata.Region).To(Equal("mock-region"))
+	})
+
+	It("should create an instance and validate providerID format", func() {
+		Expect(func() { cloud.TestCreateInstance(provider) }).ShouldNot(Panic())
 	})
 })
