@@ -8,15 +8,15 @@ import (
 	"fmt"
 	"strings"
 
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/cloud-provider"
-	. "k8s.io/kubernetes/staging/src/k8s.io/cloud-provider-mockprovider/mockprovider"
+	cloudprovider "k8s.io/cloud-provider"
+	"k8s.io/cloud-provider/fake"
 	"k8s.io/kubernetes/test/e2e/cloud"
 )
 
 type MockCloudProvider struct {
-	MockCloud
+	fake.Cloud
 }
 
 func (m *MockCloudProvider) Name() string {
@@ -34,11 +34,9 @@ func (m *MockCloudProvider) CreateInstance() (func(name string, config cloud.Ins
 		if strings.TrimSpace(name) == "" {
 			return fmt.Errorf("instance name cannot be empty")
 		}
-
 		// Simulating providerID creation
-		providerID := fmt.Sprintf("mocker://%s", name)
+		providerID := fmt.Sprintf("fake://%s", name)
 		fmt.Printf("Instance %s created with providerID: %s\n", name, providerID)
-
 		return nil
 	}, true
 }
@@ -85,17 +83,12 @@ func (m *MockCloudProvider) ServiceTests() (func() error, bool) {
 
 func (m *MockCloudProvider) InstanceMetadata() (func(node *v1.Node) (*cloudprovider.InstanceMetadata, error), bool) {
 	return func(node *v1.Node) (*cloudprovider.InstanceMetadata, error) {
-		instanceMetadata, err := (&MockInstancesV2{}).InstanceMetadata(context.TODO(), node)
+		// Use the fake.Cloud's InstanceMetadata method
+		metadata, err := m.Cloud.InstanceMetadata(context.TODO(), node)
 		if err != nil {
 			return nil, err
 		}
-		return &cloudprovider.InstanceMetadata{
-			ProviderID:    instanceMetadata.ProviderID,
-			InstanceType:  instanceMetadata.InstanceType,
-			NodeAddresses: instanceMetadata.NodeAddresses,
-			Zone:          instanceMetadata.Zone,
-			Region:        instanceMetadata.Region,
-		}, nil
+		return metadata, nil
 	}, true
 }
 
@@ -138,11 +131,10 @@ var _ = Describe("Cloud Provider CCM Tests", func() {
 
 		metadata, err := instanceMetadataFunc(node)
 		Expect(err).NotTo(HaveOccurred())
-		//Test fails here due to metadata comparision node being like mocker://...
-		Expect(metadata.ProviderID).To(Equal("mock://test-node"))
-		Expect(metadata.InstanceType).To(Equal("mock-instance-type"))
-		Expect(metadata.Zone).To(Equal("mock-zone"))
-		Expect(metadata.Region).To(Equal("mock-region"))
+		Expect(metadata.ProviderID).To(Equal("fake://test-node"))
+		Expect(metadata.InstanceType).To(Equal("fake-instance-type"))
+		Expect(metadata.Zone).To(Equal("us-central1-b")) // default in fake.Cloud
+		Expect(metadata.Region).To(Equal("us-central1")) // default in fake.Cloud
 	})
 
 	It("should create an instance and validate providerID format", func() {
