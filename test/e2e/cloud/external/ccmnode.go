@@ -31,11 +31,20 @@ import (
 )
 
 // CCMNodeTester implements the NodeTester interface for Cloud Controller Manager node tests
-type CCMNodeTester struct{}
+// It provides generic test logic and delegates cloud-specific operations to a NodeTester implementation
+type CCMNodeTester struct {
+	nodeTester cloudprovidertest.NodeTester
+}
 
 // NewCCMNodeTester creates a new CCMNodeTester instance
 func NewCCMNodeTester() cloudprovidertest.NodeTester {
 	return &CCMNodeTester{}
+}
+
+// SetNodeTester sets the cloud-specific NodeTester implementation
+// This allows the generic test logic to call cloud-specific DeleteNodeOnCloudProvider
+func (c *CCMNodeTester) SetNodeTester(tester cloudprovidertest.NodeTester) {
+	c.nodeTester = tester
 }
 
 // TestNodeDeletedOnAPIServerWhenNotInCloudProvider tests that a node
@@ -59,8 +68,12 @@ func (c *CCMNodeTester) TestNodeDeletedOnAPIServerWhenNotInCloudProvider(ctx con
 	framework.Logf("Original number of ready nodes: %d", len(origNodes.Items))
 	framework.Logf("Deleting node %q on the cloud provider", nodeToDelete.Name)
 
-	// Delete the node on the cloud provider
-	err = c.DeleteNodeOnCloudProvider(nodeToDelete)
+	// Delete the node on the cloud provider using the cloud-specific implementation
+	if c.nodeTester != nil {
+		err = c.nodeTester.DeleteNodeOnCloudProvider(nodeToDelete)
+	} else {
+		err = c.DeleteNodeOnCloudProvider(nodeToDelete)
+	}
 	if err != nil {
 		return fmt.Errorf("failed to delete node %q on cloud provider: %w", nodeToDelete.Name, err)
 	}
