@@ -25,7 +25,6 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	clientset "k8s.io/client-go/kubernetes"
-	cloudprovidertest "k8s.io/cloud-provider/test"
 	"k8s.io/kubernetes/test/e2e/framework"
 	e2enode "k8s.io/kubernetes/test/e2e/framework/node"
 )
@@ -33,36 +32,36 @@ import (
 // CCMNodeTester implements the NodeTester interface for Cloud Controller Manager node tests
 // It provides generic test logic and delegates cloud-specific operations to a NodeTester implementation
 type CCMNodeTester struct {
-	nodeTester cloudprovidertest.NodeTester
+	nodeTester NodeTester
 }
 
 // NewCCMNodeTester creates a new CCMNodeTester instance
-func NewCCMNodeTester() cloudprovidertest.NodeTester {
+func NewCCMNodeTester() NodeTester {
 	return &CCMNodeTester{}
 }
 
 // SetNodeTester sets the cloud-specific NodeTester implementation
 // This allows the generic test logic to call cloud-specific DeleteNodeOnCloudProvider
-func (c *CCMNodeTester) SetNodeTester(tester cloudprovidertest.NodeTester) {
+func (c *CCMNodeTester) SetNodeTester(tester NodeTester) {
 	c.nodeTester = tester
 }
 
 // TestNodeDeletedOnAPIServerWhenNotInCloudProvider tests that a node
 // should be deleted on API server if it doesn't exist in the cloud provider.
 // This implementation is based on the test in e2e/cloud/nodes.go
-func (c *CCMNodeTester) TestNodeDeletedOnAPIServerWhenNotInCloudProvider(ctx context.Context, client clientset.Interface) error {
+func (c *CCMNodeTester) TestNodeDeletedOnAPIServerWhenNotInCloudProvider(ctx context.Context, client clientset.Interface) (TestResult, error) {
 	framework.Logf("Testing node deletion when not present in cloud provider")
 
 	// Get a random ready schedulable node to delete
 	nodeToDelete, err := e2enode.GetRandomReadySchedulableNode(ctx, client)
 	if err != nil {
-		return fmt.Errorf("failed to get random ready schedulable node: %w", err)
+		return NewFailedTestResult(err, "failed to get random ready schedulable node"), fmt.Errorf("failed to get random ready schedulable node: %w", err)
 	}
 
 	// Get the original list of ready nodes
 	origNodes, err := e2enode.GetReadyNodesIncludingTainted(ctx, client)
 	if err != nil {
-		return fmt.Errorf("failed to get ready nodes: %w", err)
+		return NewFailedTestResult(err, "failed to get ready nodes"), fmt.Errorf("failed to get ready nodes: %w", err)
 	}
 
 	framework.Logf("Original number of ready nodes: %d", len(origNodes.Items))
@@ -75,30 +74,32 @@ func (c *CCMNodeTester) TestNodeDeletedOnAPIServerWhenNotInCloudProvider(ctx con
 		err = c.DeleteNodeOnCloudProvider(nodeToDelete)
 	}
 	if err != nil {
-		return fmt.Errorf("failed to delete node %q on cloud provider: %w", nodeToDelete.Name, err)
+		return NewFailedTestResult(err, fmt.Sprintf("failed to delete node %q on cloud provider", nodeToDelete.Name)), fmt.Errorf("failed to delete node %q on cloud provider: %w", nodeToDelete.Name, err)
 	}
 
 	// Wait for the node count to decrease by 1
 	newNodes, err := e2enode.CheckReady(ctx, client, len(origNodes.Items)-1, 5*time.Minute)
 	if err != nil {
-		return fmt.Errorf("failed to wait for ready nodes to decrease: %w", err)
+		return NewFailedTestResult(err, "failed to wait for ready nodes to decrease"), fmt.Errorf("failed to wait for ready nodes to decrease: %w", err)
 	}
 
 	if len(newNodes) != len(origNodes.Items)-1 {
-		return fmt.Errorf("expected %d nodes, got %d", len(origNodes.Items)-1, len(newNodes))
+		err := fmt.Errorf("expected %d nodes, got %d", len(origNodes.Items)-1, len(newNodes))
+		return NewFailedTestResult(err, "node count mismatch"), err
 	}
 
 	// Verify the node is deleted from the API server
 	_, err = client.CoreV1().Nodes().Get(ctx, nodeToDelete.Name, metav1.GetOptions{})
 	if err == nil {
-		return fmt.Errorf("node %q still exists when it should be deleted", nodeToDelete.Name)
+		err := fmt.Errorf("node %q still exists when it should be deleted", nodeToDelete.Name)
+		return NewFailedTestResult(err, "node still exists in API server"), err
 	}
 	if !apierrors.IsNotFound(err) {
-		return fmt.Errorf("unexpected error when getting node %q: %w", nodeToDelete.Name, err)
+		return NewFailedTestResult(err, fmt.Sprintf("unexpected error when getting node %q", nodeToDelete.Name)), fmt.Errorf("unexpected error when getting node %q: %w", nodeToDelete.Name, err)
 	}
 
 	framework.Logf("Successfully verified node %q was deleted from API server", nodeToDelete.Name)
-	return nil
+	return NewSuccessTestResult(fmt.Sprintf("Successfully verified node %q was deleted from API server", nodeToDelete.Name)), nil
 }
 
 // DeleteNodeOnCloudProvider deletes the specified node from the cloud provider
