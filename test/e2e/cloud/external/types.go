@@ -104,13 +104,23 @@ type NodeTester interface {
 	DeleteNodeOnCloudProvider(node *v1.Node) error
 }
 
+// LoadBalancerVerifier defines cloud-specific operations for load balancer verification.
+// Cloud providers should implement this interface to provide cloud-specific verification logic.
+type LoadBalancerVerifier interface {
+	// VerifyLoadBalancerExists checks if a load balancer exists in the cloud provider
+	// by its hostname or IP address. Returns true if the load balancer exists and is active.
+	VerifyLoadBalancerExists(ctx context.Context, hostnameOrIP string) (bool, error)
+}
+
 // LoadBalancerTester defines the interface for load balancer cloud provider tests.
+// The methods accept clientset.Interface to handle all Kubernetes API operations,
+// while cloud-specific verification is delegated to LoadBalancerVerifier.
 type LoadBalancerTester interface {
-	TestGetLoadBalancer(ctx context.Context, clusterName string, service *v1.Service) (TestResult, error)
+	TestGetLoadBalancer(ctx context.Context, client clientset.Interface) (TestResult, error)
 	TestGetLoadBalancerName(ctx context.Context, clusterName string, service *v1.Service) (TestResult, error)
-	TestEnsureLoadBalancer(ctx context.Context, clusterName string, service *v1.Service, nodes []*v1.Node) (TestResult, error)
-	TestUpdateLoadBalancer(ctx context.Context, clusterName string, service *v1.Service, nodes []*v1.Node) (TestResult, error)
-	TestEnsureLoadBalancerDeleted(ctx context.Context, clusterName string, service *v1.Service) (TestResult, error)
+	TestEnsureLoadBalancer(ctx context.Context, client clientset.Interface) (TestResult, error)
+	TestUpdateLoadBalancer(ctx context.Context, client clientset.Interface) (TestResult, error)
+	TestEnsureLoadBalancerDeleted(ctx context.Context, client clientset.Interface) (TestResult, error)
 }
 
 // InstancesTester defines the interface for instances cloud provider tests.
@@ -126,11 +136,24 @@ type InstancesTester interface {
 	TestInstanceShutdownByProviderID(ctx context.Context, providerID string) (TestResult, error)
 }
 
+// InstanceV2Verifier defines cloud-specific operations for instance verification.
+// Cloud providers should implement this interface to provide cloud-specific verification logic.
+type InstanceV2Verifier interface {
+	// VerifyInstanceExists checks if an instance exists in the cloud provider for the given node.
+	VerifyInstanceExists(ctx context.Context, node *v1.Node) (bool, error)
+	// VerifyInstanceShutdown checks if an instance is shutdown in the cloud provider for the given node.
+	VerifyInstanceShutdown(ctx context.Context, node *v1.Node) (bool, error)
+	// GetInstanceMetadata retrieves instance metadata from the cloud provider for the given node.
+	GetInstanceMetadata(ctx context.Context, node *v1.Node) (map[string]interface{}, error)
+}
+
 // InstancesV2Tester defines the interface for InstancesV2 cloud provider tests.
+// The methods accept clientset.Interface to handle all Kubernetes API operations,
+// while cloud-specific verification is delegated to InstanceV2Verifier.
 type InstancesV2Tester interface {
-	TestInstanceExists(ctx context.Context, node *v1.Node) (TestResult, error)
-	TestInstanceShutdown(ctx context.Context, node *v1.Node) (TestResult, error)
-	TestInstanceMetadata(ctx context.Context, node *v1.Node) (TestResult, error)
+	TestInstanceExists(ctx context.Context, client clientset.Interface) (TestResult, error)
+	TestInstanceShutdown(ctx context.Context, client clientset.Interface) (TestResult, error)
+	TestInstanceMetadata(ctx context.Context, client clientset.Interface) (TestResult, error)
 }
 
 // RoutesTester defines the interface for routes cloud provider tests.
@@ -140,11 +163,24 @@ type RoutesTester interface {
 	TestDeleteRoute(ctx context.Context, clusterName string, route *cloudprovider.Route) (TestResult, error)
 }
 
+// ZoneVerifier defines cloud-specific operations for zone verification.
+// Cloud providers should implement this interface to provide cloud-specific verification logic.
+type ZoneVerifier interface {
+	// GetZoneByProviderID retrieves the zone from the cloud provider using the provider ID.
+	GetZoneByProviderID(ctx context.Context, providerID string) (string, error)
+	// GetZoneByInstanceID retrieves the zone from the cloud provider using the instance ID.
+	GetZoneByInstanceID(ctx context.Context, instanceID string) (string, error)
+	// GetAvailableZones returns the list of available zones in the region.
+	GetAvailableZones(ctx context.Context) ([]string, error)
+}
+
 // ZonesTester defines the interface for zones cloud provider tests.
+// The methods accept clientset.Interface to handle all Kubernetes API operations,
+// while cloud-specific verification is delegated to ZoneVerifier.
 type ZonesTester interface {
-	TestGetZone(ctx context.Context) (TestResult, error)
-	TestGetZoneByProviderID(ctx context.Context, providerID string) (TestResult, error)
-	TestGetZoneByNodeName(ctx context.Context, nodeName types.NodeName) (TestResult, error)
+	TestGetZone(ctx context.Context, client clientset.Interface) (TestResult, error)
+	TestGetZoneByProviderID(ctx context.Context, client clientset.Interface) (TestResult, error)
+	TestGetZoneByNodeName(ctx context.Context, client clientset.Interface) (TestResult, error)
 }
 
 // ClustersTester defines the interface for clusters cloud provider tests.
