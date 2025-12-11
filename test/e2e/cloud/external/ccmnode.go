@@ -103,6 +103,10 @@ func (c *CCMNodeTester) TestNodeDeletedOnAPIServerWhenNotInCloudProvider(ctx con
 }
 
 // DeleteNodeOnCloudProvider deletes the specified node from the cloud provider
+// Note: This method doesn't have access to a client to validate cloud provider configuration
+// via nodes, so it uses the framework's cloud provider check. The calling test method
+// (TestNodeDeletedOnAPIServerWhenNotInCloudProvider) validates cloud provider configuration
+// before calling this method.
 func (c *CCMNodeTester) DeleteNodeOnCloudProvider(node *v1.Node) error {
 	if framework.TestContext.CloudConfig.Provider == nil {
 		return fmt.Errorf("cloud provider is not configured")

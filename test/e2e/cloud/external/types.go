@@ -18,11 +18,14 @@ package external
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
-	"k8s.io/apimachinery/pkg/types"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/cloud-provider"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	clientset "k8s.io/client-go/kubernetes"
+	cloudprovider "k8s.io/cloud-provider"
 )
 
 // TestResult provides rich information about test execution results.
@@ -203,3 +206,66 @@ type Tester interface {
 	ProviderName() string
 }
 
+// validateCloudProviderConfigured validates that a cloud provider is configured
+// by checking nodes for cloud provider indicators. It checks:
+// 1. Cloud provider annotation (cloudprovider.kubernetes.io/provider-name)
+// 2. ProviderID format (aws://, gce://, azure://, etc.)
+// 3. Node labels (topology.kubernetes.io/region)
+// Returns an error if no cloud provider indicators are found on any node, nil otherwise.
+func validateCloudProviderConfigured(ctx context.Context, client clientset.Interface) error {
+	nodes, err := client.CoreV1().Nodes().List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to list nodes: %w", err)
+	}
+
+	if len(nodes.Items) == 0 {
+		return fmt.Errorf("no nodes found")
+	}
+
+	// Common cloud provider ProviderID prefixes
+	cloudProviderPrefixes := []string{
+		"aws://",
+		"gce://",
+		"azure://",
+		"vsphere://",
+		"openstack://",
+		"cloudstack://",
+		"ovirt://",
+		"photon://",
+		"alicloud://",
+		"tencent://",
+		"huawei://",
+		"baiducloud://",
+		"ibmcloud://",
+		"kubemark://",
+		"external://",
+	}
+
+	// Check if at least one node has cloud provider indicators
+	for _, node := range nodes.Items {
+		// Check 1: Cloud provider annotation (if present, use it)
+		if providerName, ok := node.Annotations["cloudprovider.kubernetes.io/provider-name"]; ok {
+			if providerName != "" {
+				return nil // Node has cloud provider configured
+			}
+		}
+
+		// Check 2: ProviderID format
+		providerID := node.Spec.ProviderID
+		if providerID != "" {
+			for _, prefix := range cloudProviderPrefixes {
+				if strings.HasPrefix(providerID, prefix) {
+					return nil // ProviderID indicates cloud provider
+				}
+			}
+		}
+
+		// Check 3: Node labels (fallback)
+		if _, ok := node.Labels["topology.kubernetes.io/region"]; ok {
+			return nil // Region label suggests cloud provider
+		}
+	}
+
+	// If we get here, no nodes had cloud provider indicators
+	return fmt.Errorf("cloud provider is not configured (no annotation, invalid ProviderID format, or missing region label found on any node)")
+}

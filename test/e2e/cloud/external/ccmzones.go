@@ -50,8 +50,8 @@ func (c *CCMZonesTester) SetZoneVerifier(verifier ZoneVerifier) {
 // It handles all Kubernetes API operations (listing nodes, verifying labels) and delegates
 // cloud-specific zone retrieval to ZoneVerifier.
 func (c *CCMZonesTester) TestGetZone(ctx context.Context, client clientset.Interface) (TestResult, error) {
-	if framework.TestContext.CloudConfig.Provider == nil {
-		return NewSkippedTestResult("cloud provider is not configured"), fmt.Errorf("cloud provider is not configured")
+	if err := validateCloudProviderConfigured(ctx, client); err != nil {
+		return NewSkippedTestResult("cloud provider is not configured"), err
 	}
 
 	// Get list of nodes to verify zone information
@@ -113,8 +113,8 @@ func (c *CCMZonesTester) TestGetZone(ctx context.Context, client clientset.Inter
 // It handles all Kubernetes API operations (listing nodes) and delegates cloud-specific
 // zone retrieval to ZoneVerifier.
 func (c *CCMZonesTester) TestGetZoneByProviderID(ctx context.Context, client clientset.Interface) (TestResult, error) {
-	if framework.TestContext.CloudConfig.Provider == nil {
-		return NewSkippedTestResult("cloud provider is not configured"), fmt.Errorf("cloud provider is not configured")
+	if err := validateCloudProviderConfigured(ctx, client); err != nil {
+		return NewSkippedTestResult("cloud provider is not configured"), err
 	}
 
 	if c.verifier == nil {
@@ -166,8 +166,8 @@ func (c *CCMZonesTester) TestGetZoneByProviderID(ctx context.Context, client cli
 // It handles all Kubernetes API operations (listing nodes, getting nodes by name) and delegates
 // cloud-specific zone retrieval to ZoneVerifier.
 func (c *CCMZonesTester) TestGetZoneByNodeName(ctx context.Context, client clientset.Interface) (TestResult, error) {
-	if framework.TestContext.CloudConfig.Provider == nil {
-		return NewSkippedTestResult("cloud provider is not configured"), fmt.Errorf("cloud provider is not configured")
+	if err := validateCloudProviderConfigured(ctx, client); err != nil {
+		return NewSkippedTestResult("cloud provider is not configured"), err
 	}
 
 	if c.verifier == nil {
@@ -225,4 +225,3 @@ func contains(slice []string, s string) bool {
 	}
 	return false
 }
-

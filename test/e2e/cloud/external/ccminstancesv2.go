@@ -48,8 +48,8 @@ func (c *CCMInstancesV2Tester) SetInstanceV2Verifier(verifier InstanceV2Verifier
 // It handles all Kubernetes API operations (listing nodes) and delegates cloud-specific
 // verification to InstanceV2Verifier.
 func (c *CCMInstancesV2Tester) TestInstanceExists(ctx context.Context, client clientset.Interface) (TestResult, error) {
-	if framework.TestContext.CloudConfig.Provider == nil {
-		return NewSkippedTestResult("cloud provider is not configured"), fmt.Errorf("cloud provider is not configured")
+	if err := validateCloudProviderConfigured(ctx, client); err != nil {
+		return NewSkippedTestResult("cloud provider is not configured"), err
 	}
 
 	if c.verifier == nil {
@@ -96,8 +96,8 @@ func (c *CCMInstancesV2Tester) TestInstanceExists(ctx context.Context, client cl
 // It handles all Kubernetes API operations (listing nodes) and delegates cloud-specific
 // verification to InstanceV2Verifier.
 func (c *CCMInstancesV2Tester) TestInstanceShutdown(ctx context.Context, client clientset.Interface) (TestResult, error) {
-	if framework.TestContext.CloudConfig.Provider == nil {
-		return NewSkippedTestResult("cloud provider is not configured"), fmt.Errorf("cloud provider is not configured")
+	if err := validateCloudProviderConfigured(ctx, client); err != nil {
+		return NewSkippedTestResult("cloud provider is not configured"), err
 	}
 
 	if c.verifier == nil {
@@ -153,8 +153,8 @@ func (c *CCMInstancesV2Tester) TestInstanceShutdown(ctx context.Context, client 
 // It handles all Kubernetes API operations (listing nodes, verifying labels) and delegates
 // cloud-specific metadata retrieval to InstanceV2Verifier.
 func (c *CCMInstancesV2Tester) TestInstanceMetadata(ctx context.Context, client clientset.Interface) (TestResult, error) {
-	if framework.TestContext.CloudConfig.Provider == nil {
-		return NewSkippedTestResult("cloud provider is not configured"), fmt.Errorf("cloud provider is not configured")
+	if err := validateCloudProviderConfigured(ctx, client); err != nil {
+		return NewSkippedTestResult("cloud provider is not configured"), err
 	}
 
 	if c.verifier == nil {
@@ -225,4 +225,3 @@ func (c *CCMInstancesV2Tester) TestInstanceMetadata(ctx context.Context, client 
 	framework.Logf("Successfully verified instance metadata for all nodes")
 	return NewSuccessTestResult("Successfully verified instance metadata for all nodes"), nil
 }
-
