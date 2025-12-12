@@ -52,7 +52,7 @@ func (c *CCMLoadBalancerTester) SetLoadBalancerVerifier(verifier LoadBalancerVer
 // It handles all Kubernetes API operations and delegates cloud-specific verification to LoadBalancerVerifier.
 func (c *CCMLoadBalancerTester) TestGetLoadBalancer(ctx context.Context, client clientset.Interface) (TestResult, error) {
 	if err := validateCloudProviderConfigured(ctx, client); err != nil {
-		return NewSkippedTestResult("cloud provider is not configured"), err
+		return NewSkippedTestResult("skipped - cloud provider is not configured"), err
 	}
 
 	// Get all LoadBalancer services
@@ -101,14 +101,14 @@ func (c *CCMLoadBalancerTester) TestGetLoadBalancer(ctx context.Context, client 
 // This test verifies that the cloud provider can generate appropriate load balancer names.
 func (c *CCMLoadBalancerTester) TestGetLoadBalancerName(ctx context.Context, clusterName string, service *v1.Service) (TestResult, error) {
 	if framework.TestContext.CloudConfig.Provider == nil {
-		return NewSkippedTestResult("cloud provider is not configured"), fmt.Errorf("cloud provider is not configured")
+		return NewSkippedTestResult("skipped - cloud provider is not configured"), fmt.Errorf("cloud provider is not configured")
 	}
 
 	// TODO: Implement test logic that calls cloudprovider.LoadBalancer.GetLoadBalancerName
 	// This requires access to the cloudprovider.Interface which is not directly available
 	// through the test framework. Cloud providers should implement their own version
 	// that accesses their cloud provider interface.
-	return NewSkippedTestResult("TestGetLoadBalancerName not yet implemented - cloud providers should implement this"), nil
+	return NewSkippedTestResult("skipped - TestGetLoadBalancerName not implemented"), nil
 }
 
 // TestEnsureLoadBalancer tests the EnsureLoadBalancer functionality.
@@ -117,7 +117,7 @@ func (c *CCMLoadBalancerTester) TestGetLoadBalancerName(ctx context.Context, clu
 // and delegates cloud-specific verification to LoadBalancerVerifier.
 func (c *CCMLoadBalancerTester) TestEnsureLoadBalancer(ctx context.Context, client clientset.Interface) (TestResult, error) {
 	if err := validateCloudProviderConfigured(ctx, client); err != nil {
-		return NewSkippedTestResult("cloud provider is not configured"), err
+		return NewSkippedTestResult("skipped - cloud provider is not configured"), err
 	}
 
 	namespace := "lb-test-ns"
@@ -214,7 +214,7 @@ func (c *CCMLoadBalancerTester) TestEnsureLoadBalancer(ctx context.Context, clie
 // and delegates cloud-specific verification to LoadBalancerVerifier.
 func (c *CCMLoadBalancerTester) TestUpdateLoadBalancer(ctx context.Context, client clientset.Interface) (TestResult, error) {
 	if err := validateCloudProviderConfigured(ctx, client); err != nil {
-		return NewSkippedTestResult("cloud provider is not configured"), err
+		return NewSkippedTestResult("skipped - cloud provider is not configured"), err
 	}
 
 	namespace := "lb-test-ns"
@@ -314,7 +314,7 @@ func (c *CCMLoadBalancerTester) TestUpdateLoadBalancer(ctx context.Context, clie
 // and delegates cloud-specific verification to LoadBalancerVerifier.
 func (c *CCMLoadBalancerTester) TestEnsureLoadBalancerDeleted(ctx context.Context, client clientset.Interface) (TestResult, error) {
 	if err := validateCloudProviderConfigured(ctx, client); err != nil {
-		return NewSkippedTestResult("cloud provider is not configured"), err
+		return NewSkippedTestResult("skipped - cloud provider is not configured"), err
 	}
 
 	namespace := "lb-test-ns"

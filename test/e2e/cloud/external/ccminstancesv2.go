@@ -49,11 +49,11 @@ func (c *CCMInstancesV2Tester) SetInstanceV2Verifier(verifier InstanceV2Verifier
 // verification to InstanceV2Verifier.
 func (c *CCMInstancesV2Tester) TestInstanceExists(ctx context.Context, client clientset.Interface) (TestResult, error) {
 	if err := validateCloudProviderConfigured(ctx, client); err != nil {
-		return NewSkippedTestResult("cloud provider is not configured"), err
+		return NewSkippedTestResult("skipped - cloud provider is not configured"), err
 	}
 
 	if c.verifier == nil {
-		return NewSkippedTestResult("InstanceV2Verifier is not configured"), fmt.Errorf("InstanceV2Verifier is not configured")
+		return NewSkippedTestResult("skipped - InstanceV2Verifier is not configured"), fmt.Errorf("InstanceV2Verifier is not configured")
 	}
 
 	// Get list of nodes
@@ -97,11 +97,11 @@ func (c *CCMInstancesV2Tester) TestInstanceExists(ctx context.Context, client cl
 // verification to InstanceV2Verifier.
 func (c *CCMInstancesV2Tester) TestInstanceShutdown(ctx context.Context, client clientset.Interface) (TestResult, error) {
 	if err := validateCloudProviderConfigured(ctx, client); err != nil {
-		return NewSkippedTestResult("cloud provider is not configured"), err
+		return NewSkippedTestResult("skipped - cloud provider is not configured"), err
 	}
 
 	if c.verifier == nil {
-		return NewSkippedTestResult("InstanceV2Verifier is not configured"), fmt.Errorf("InstanceV2Verifier is not configured")
+		return NewSkippedTestResult("skipped - InstanceV2Verifier is not configured"), fmt.Errorf("InstanceV2Verifier is not configured")
 	}
 
 	// Get list of nodes
@@ -154,11 +154,11 @@ func (c *CCMInstancesV2Tester) TestInstanceShutdown(ctx context.Context, client 
 // cloud-specific metadata retrieval to InstanceV2Verifier.
 func (c *CCMInstancesV2Tester) TestInstanceMetadata(ctx context.Context, client clientset.Interface) (TestResult, error) {
 	if err := validateCloudProviderConfigured(ctx, client); err != nil {
-		return NewSkippedTestResult("cloud provider is not configured"), err
+		return NewSkippedTestResult("skipped - cloud provider is not configured"), err
 	}
 
 	if c.verifier == nil {
-		return NewSkippedTestResult("InstanceV2Verifier is not configured"), fmt.Errorf("InstanceV2Verifier is not configured")
+		return NewSkippedTestResult("skipped - InstanceV2Verifier is not configured"), fmt.Errorf("InstanceV2Verifier is not configured")
 	}
 
 	// Get list of nodes

@@ -40,21 +40,20 @@ func NewCCMClustersTester() ClustersTester {
 // This test verifies that the cloud provider can list the names of the available clusters.
 func (c *CCMClustersTester) TestListClusters(ctx context.Context) (TestResult, error) {
 	if framework.TestContext.CloudConfig.Provider == nil {
-		return NewSkippedTestResult("cloud provider is not configured"), fmt.Errorf("cloud provider is not configured")
+		return NewSkippedTestResult("skipped - cloud provider is not configured"), fmt.Errorf("cloud provider is not configured")
 	}
 
 	// TODO: Implement test logic that calls cloudprovider.Clusters.ListClusters
-	return NewSkippedTestResult("TestListClusters not yet implemented - cloud providers should implement this"), nil
+	return NewSkippedTestResult("skipped - TestListClusters not implemented"), nil
 }
 
 // TestMaster tests the Master functionality.
 // This test verifies that the cloud provider can retrieve the address of the master node for the cluster.
 func (c *CCMClustersTester) TestMaster(ctx context.Context, clusterName string) (TestResult, error) {
 	if framework.TestContext.CloudConfig.Provider == nil {
-		return NewSkippedTestResult("cloud provider is not configured"), fmt.Errorf("cloud provider is not configured")
+		return NewSkippedTestResult("skipped - cloud provider is not configured"), fmt.Errorf("cloud provider is not configured")
 	}
 
 	// TODO: Implement test logic that calls cloudprovider.Clusters.Master
-	return NewSkippedTestResult("TestMaster not yet implemented - cloud providers should implement this"), nil
+	return NewSkippedTestResult("skipped - TestMaster not implemented"), nil
 }
-

@@ -92,8 +92,30 @@ func NewSuccessTestResult(message string) TestResult {
 	}
 }
 
+// ClusterStabilityVerifier defines cloud-specific operations for cluster stability verification.
+// Cloud providers should implement this interface to provide cloud-specific stability checks
+// after destructive operations like node deletion.
+//
+// Default implementations (CCM*Tester) provide graceful skip behavior for unimplemented methods.
+// Cloud providers can embed these defaults and only override methods they implement.
+// All methods should return NewSkippedTestResult() when not implemented.
+type ClusterStabilityVerifier interface {
+	// VerifyClusterStability checks if the cluster is stable after a destructive operation.
+	// This should verify that:
+	// - Nodes are in expected state
+	// - Pods are rescheduled if needed
+	// - Services are still available
+	// - Core components are healthy
+	// Returns an error if the cluster is not stable, nil otherwise.
+	VerifyClusterStability(ctx context.Context, client clientset.Interface) error
+}
+
 // NodeTester defines the interface for node cloud provider tests.
 // Based on the tests in e2e/cloud/nodes.go
+//
+// Default implementations (CCM*Tester) provide graceful skip behavior for unimplemented methods.
+// Cloud providers can embed these defaults and only override methods they implement.
+// All methods should return NewSkippedTestResult() when not implemented.
 type NodeTester interface {
 	// TestNodeDeletedOnAPIServerWhenNotInCloudProvider tests that a node
 	// should be deleted on API server if it doesn't exist in the cloud provider.
@@ -104,7 +126,15 @@ type NodeTester interface {
 	// DeleteNodeOnCloudProvider deletes the specified node from the cloud provider.
 	// This is a helper method used by test implementations to perform
 	// cloud-specific node deletion operations.
+	// Returns an error if the operation fails or is not supported.
 	DeleteNodeOnCloudProvider(node *v1.Node) error
+
+	// VerifyClusterStabilityAfterNodeDeletion verifies that the cluster is stable
+	// after a node deletion operation. This method should be called after destructive
+	// node operations to ensure the cluster has recovered properly.
+	// Returns TestResult indicating whether the cluster is stable, and an error for compatibility.
+	// If the feature is not implemented, TestResult.Skipped should be true.
+	VerifyClusterStabilityAfterNodeDeletion(ctx context.Context, client clientset.Interface) (TestResult, error)
 }
 
 // LoadBalancerVerifier defines cloud-specific operations for load balancer verification.
@@ -118,6 +148,10 @@ type LoadBalancerVerifier interface {
 // LoadBalancerTester defines the interface for load balancer cloud provider tests.
 // The methods accept clientset.Interface to handle all Kubernetes API operations,
 // while cloud-specific verification is delegated to LoadBalancerVerifier.
+//
+// Default implementations (CCM*Tester) provide graceful skip behavior for unimplemented methods.
+// Cloud providers can embed these defaults and only override methods they implement.
+// All methods should return NewSkippedTestResult() when not implemented.
 type LoadBalancerTester interface {
 	TestGetLoadBalancer(ctx context.Context, client clientset.Interface) (TestResult, error)
 	TestGetLoadBalancerName(ctx context.Context, clusterName string, service *v1.Service) (TestResult, error)
@@ -127,6 +161,10 @@ type LoadBalancerTester interface {
 }
 
 // InstancesTester defines the interface for instances cloud provider tests.
+//
+// Default implementations (CCM*Tester) provide graceful skip behavior for unimplemented methods.
+// Cloud providers can embed these defaults and only override methods they implement.
+// All methods should return NewSkippedTestResult() when not implemented.
 type InstancesTester interface {
 	TestNodeAddresses(ctx context.Context, nodeName types.NodeName) (TestResult, error)
 	TestNodeAddressesByProviderID(ctx context.Context, providerID string) (TestResult, error)
@@ -153,6 +191,10 @@ type InstanceV2Verifier interface {
 // InstancesV2Tester defines the interface for InstancesV2 cloud provider tests.
 // The methods accept clientset.Interface to handle all Kubernetes API operations,
 // while cloud-specific verification is delegated to InstanceV2Verifier.
+//
+// Default implementations (CCM*Tester) provide graceful skip behavior for unimplemented methods.
+// Cloud providers can embed these defaults and only override methods they implement.
+// All methods should return NewSkippedTestResult() when not implemented.
 type InstancesV2Tester interface {
 	TestInstanceExists(ctx context.Context, client clientset.Interface) (TestResult, error)
 	TestInstanceShutdown(ctx context.Context, client clientset.Interface) (TestResult, error)
@@ -160,6 +202,10 @@ type InstancesV2Tester interface {
 }
 
 // RoutesTester defines the interface for routes cloud provider tests.
+//
+// Default implementations (CCM*Tester) provide graceful skip behavior for unimplemented methods.
+// Cloud providers can embed these defaults and only override methods they implement.
+// All methods should return NewSkippedTestResult() when not implemented.
 type RoutesTester interface {
 	TestListRoutes(ctx context.Context, clusterName string) (TestResult, error)
 	TestCreateRoute(ctx context.Context, clusterName string, nameHint string, route *cloudprovider.Route) (TestResult, error)
@@ -180,6 +226,10 @@ type ZoneVerifier interface {
 // ZonesTester defines the interface for zones cloud provider tests.
 // The methods accept clientset.Interface to handle all Kubernetes API operations,
 // while cloud-specific verification is delegated to ZoneVerifier.
+//
+// Default implementations (CCM*Tester) provide graceful skip behavior for unimplemented methods.
+// Cloud providers can embed these defaults and only override methods they implement.
+// All methods should return NewSkippedTestResult() when not implemented.
 type ZonesTester interface {
 	TestGetZone(ctx context.Context, client clientset.Interface) (TestResult, error)
 	TestGetZoneByProviderID(ctx context.Context, client clientset.Interface) (TestResult, error)
@@ -187,6 +237,10 @@ type ZonesTester interface {
 }
 
 // ClustersTester defines the interface for clusters cloud provider tests.
+//
+// Default implementations (CCM*Tester) provide graceful skip behavior for unimplemented methods.
+// Cloud providers can embed these defaults and only override methods they implement.
+// All methods should return NewSkippedTestResult() when not implemented.
 type ClustersTester interface {
 	TestListClusters(ctx context.Context) (TestResult, error)
 	TestMaster(ctx context.Context, clusterName string) (TestResult, error)

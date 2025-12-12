@@ -41,11 +41,11 @@ func NewCCMInstancesTester() InstancesTester {
 // This test verifies that the cloud provider can retrieve node addresses for a given node name.
 func (c *CCMInstancesTester) TestNodeAddresses(ctx context.Context, nodeName types.NodeName) (TestResult, error) {
 	if framework.TestContext.CloudConfig.Provider == nil {
-		return NewSkippedTestResult("cloud provider is not configured"), fmt.Errorf("cloud provider is not configured")
+		return NewSkippedTestResult("skipped - cloud provider is not configured"), fmt.Errorf("cloud provider is not configured")
 	}
 
 	// TODO: Implement test logic that calls cloudprovider.Instances.NodeAddresses
-	return NewSkippedTestResult("TestNodeAddresses not yet implemented - cloud providers should implement this"), nil
+	return NewSkippedTestResult("skipped - TestNodeAddresses not implemented"), nil
 }
 
 // TestNodeAddressesByProviderID tests the NodeAddressesByProviderID functionality.
@@ -56,7 +56,7 @@ func (c *CCMInstancesTester) TestNodeAddressesByProviderID(ctx context.Context, 
 	}
 
 	// TODO: Implement test logic that calls cloudprovider.Instances.NodeAddressesByProviderID
-	return NewSkippedTestResult("TestNodeAddressesByProviderID not yet implemented - cloud providers should implement this"), nil
+	return NewSkippedTestResult("skipped - TestNodeAddressesByProviderID not implemented"), nil
 }
 
 // TestInstanceID tests the InstanceID functionality.
@@ -67,7 +67,7 @@ func (c *CCMInstancesTester) TestInstanceID(ctx context.Context, nodeName types.
 	}
 
 	// TODO: Implement test logic that calls cloudprovider.Instances.InstanceID
-	return NewSkippedTestResult("TestInstanceID not yet implemented - cloud providers should implement this"), nil
+	return NewSkippedTestResult("skipped - TestInstanceID not implemented"), nil
 }
 
 // TestInstanceType tests the InstanceType functionality.
@@ -78,7 +78,7 @@ func (c *CCMInstancesTester) TestInstanceType(ctx context.Context, nodeName type
 	}
 
 	// TODO: Implement test logic that calls cloudprovider.Instances.InstanceType
-	return NewSkippedTestResult("TestInstanceType not yet implemented - cloud providers should implement this"), nil
+	return NewSkippedTestResult("skipped - TestInstanceType not implemented"), nil
 }
 
 // TestInstanceTypeByProviderID tests the InstanceTypeByProviderID functionality.
@@ -89,7 +89,7 @@ func (c *CCMInstancesTester) TestInstanceTypeByProviderID(ctx context.Context, p
 	}
 
 	// TODO: Implement test logic that calls cloudprovider.Instances.InstanceTypeByProviderID
-	return NewSkippedTestResult("TestInstanceTypeByProviderID not yet implemented - cloud providers should implement this"), nil
+	return NewSkippedTestResult("skipped - TestInstanceTypeByProviderID not implemented"), nil
 }
 
 // TestAddSSHKeyToAllInstances tests the AddSSHKeyToAllInstances functionality.
@@ -100,7 +100,7 @@ func (c *CCMInstancesTester) TestAddSSHKeyToAllInstances(ctx context.Context, us
 	}
 
 	// TODO: Implement test logic that calls cloudprovider.Instances.AddSSHKeyToAllInstances
-	return NewSkippedTestResult("TestAddSSHKeyToAllInstances not yet implemented - cloud providers should implement this"), nil
+	return NewSkippedTestResult("skipped - TestAddSSHKeyToAllInstances not implemented"), nil
 }
 
 // TestCurrentNodeName tests the CurrentNodeName functionality.
@@ -111,7 +111,7 @@ func (c *CCMInstancesTester) TestCurrentNodeName(ctx context.Context, hostname s
 	}
 
 	// TODO: Implement test logic that calls cloudprovider.Instances.CurrentNodeName
-	return NewSkippedTestResult("TestCurrentNodeName not yet implemented - cloud providers should implement this"), nil
+	return NewSkippedTestResult("skipped - TestCurrentNodeName not implemented"), nil
 }
 
 // TestInstanceExistsByProviderID tests the InstanceExistsByProviderID functionality.
@@ -122,7 +122,7 @@ func (c *CCMInstancesTester) TestInstanceExistsByProviderID(ctx context.Context,
 	}
 
 	// TODO: Implement test logic that calls cloudprovider.Instances.InstanceExistsByProviderID
-	return NewSkippedTestResult("TestInstanceExistsByProviderID not yet implemented - cloud providers should implement this"), nil
+	return NewSkippedTestResult("skipped - TestInstanceExistsByProviderID not implemented"), nil
 }
 
 // TestInstanceShutdownByProviderID tests the InstanceShutdownByProviderID functionality.
@@ -133,6 +133,5 @@ func (c *CCMInstancesTester) TestInstanceShutdownByProviderID(ctx context.Contex
 	}
 
 	// TODO: Implement test logic that calls cloudprovider.Instances.InstanceShutdownByProviderID
-	return NewSkippedTestResult("TestInstanceShutdownByProviderID not yet implemented - cloud providers should implement this"), nil
+	return NewSkippedTestResult("skipped - TestInstanceShutdownByProviderID not implemented"), nil
 }
-

@@ -20,7 +20,7 @@ import (
 	"context"
 	"fmt"
 
-	"k8s.io/cloud-provider"
+	cloudprovider "k8s.io/cloud-provider"
 	"k8s.io/kubernetes/test/e2e/framework"
 )
 
@@ -41,32 +41,31 @@ func NewCCMRoutesTester() RoutesTester {
 // This test verifies that the cloud provider can list all managed routes that belong to the specified cluster.
 func (c *CCMRoutesTester) TestListRoutes(ctx context.Context, clusterName string) (TestResult, error) {
 	if framework.TestContext.CloudConfig.Provider == nil {
-		return NewSkippedTestResult("cloud provider is not configured"), fmt.Errorf("cloud provider is not configured")
+		return NewSkippedTestResult("skipped - cloud provider is not configured"), fmt.Errorf("cloud provider is not configured")
 	}
 
 	// TODO: Implement test logic that calls cloudprovider.Routes.ListRoutes
-	return NewSkippedTestResult("TestListRoutes not yet implemented - cloud providers should implement this"), nil
+	return NewSkippedTestResult("skipped - TestListRoutes not implemented"), nil
 }
 
 // TestCreateRoute tests the CreateRoute functionality.
 // This test verifies that the cloud provider can create a managed route.
 func (c *CCMRoutesTester) TestCreateRoute(ctx context.Context, clusterName string, nameHint string, route *cloudprovider.Route) (TestResult, error) {
 	if framework.TestContext.CloudConfig.Provider == nil {
-		return NewSkippedTestResult("cloud provider is not configured"), fmt.Errorf("cloud provider is not configured")
+		return NewSkippedTestResult("skipped - cloud provider is not configured"), fmt.Errorf("cloud provider is not configured")
 	}
 
 	// TODO: Implement test logic that calls cloudprovider.Routes.CreateRoute
-	return NewSkippedTestResult("TestCreateRoute not yet implemented - cloud providers should implement this"), nil
+	return NewSkippedTestResult("skipped - TestCreateRoute not implemented"), nil
 }
 
 // TestDeleteRoute tests the DeleteRoute functionality.
 // This test verifies that the cloud provider can delete a managed route.
 func (c *CCMRoutesTester) TestDeleteRoute(ctx context.Context, clusterName string, route *cloudprovider.Route) (TestResult, error) {
 	if framework.TestContext.CloudConfig.Provider == nil {
-		return NewSkippedTestResult("cloud provider is not configured"), fmt.Errorf("cloud provider is not configured")
+		return NewSkippedTestResult("skipped - cloud provider is not configured"), fmt.Errorf("cloud provider is not configured")
 	}
 
 	// TODO: Implement test logic that calls cloudprovider.Routes.DeleteRoute
-	return NewSkippedTestResult("TestDeleteRoute not yet implemented - cloud providers should implement this"), nil
+	return NewSkippedTestResult("skipped - TestDeleteRoute not implemented"), nil
 }
-

@@ -51,7 +51,7 @@ func (c *CCMZonesTester) SetZoneVerifier(verifier ZoneVerifier) {
 // cloud-specific zone retrieval to ZoneVerifier.
 func (c *CCMZonesTester) TestGetZone(ctx context.Context, client clientset.Interface) (TestResult, error) {
 	if err := validateCloudProviderConfigured(ctx, client); err != nil {
-		return NewSkippedTestResult("cloud provider is not configured"), err
+		return NewSkippedTestResult("skipped - cloud provider is not configured"), err
 	}
 
 	// Get list of nodes to verify zone information
@@ -114,11 +114,11 @@ func (c *CCMZonesTester) TestGetZone(ctx context.Context, client clientset.Inter
 // zone retrieval to ZoneVerifier.
 func (c *CCMZonesTester) TestGetZoneByProviderID(ctx context.Context, client clientset.Interface) (TestResult, error) {
 	if err := validateCloudProviderConfigured(ctx, client); err != nil {
-		return NewSkippedTestResult("cloud provider is not configured"), err
+		return NewSkippedTestResult("skipped - cloud provider is not configured"), err
 	}
 
 	if c.verifier == nil {
-		return NewSkippedTestResult("ZoneVerifier is not configured"), fmt.Errorf("ZoneVerifier is not configured")
+		return NewSkippedTestResult("skipped - ZoneVerifier is not configured"), fmt.Errorf("ZoneVerifier is not configured")
 	}
 
 	// Get list of nodes
@@ -167,11 +167,11 @@ func (c *CCMZonesTester) TestGetZoneByProviderID(ctx context.Context, client cli
 // cloud-specific zone retrieval to ZoneVerifier.
 func (c *CCMZonesTester) TestGetZoneByNodeName(ctx context.Context, client clientset.Interface) (TestResult, error) {
 	if err := validateCloudProviderConfigured(ctx, client); err != nil {
-		return NewSkippedTestResult("cloud provider is not configured"), err
+		return NewSkippedTestResult("skipped - cloud provider is not configured"), err
 	}
 
 	if c.verifier == nil {
-		return NewSkippedTestResult("ZoneVerifier is not configured"), fmt.Errorf("ZoneVerifier is not configured")
+		return NewSkippedTestResult("skipped - ZoneVerifier is not configured"), fmt.Errorf("ZoneVerifier is not configured")
 	}
 
 	// Get list of nodes
