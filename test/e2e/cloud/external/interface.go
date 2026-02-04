@@ -16,6 +16,20 @@ limitations under the License.
 
 package external
 
+type TestNodeLifecycleInterface interface {
+	Exists() bool
+	IsShutdown() bool
+	Details() NodeDetails
+	Addresses() []NodeAddress
+}
+
+type TestLoadBalancerInterface interface {
+	Create() LoadBalancer
+	Update() LoadBalancer
+	Get() LoadBalancer
+	Delete() LoadBalancer
+}
+
 // TestInterface provides a cloud-agnostic testing interface for cloud providers
 // to implement in their repositories. This enables standardized testing across
 // different cloud provider implementations.
