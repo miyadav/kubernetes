@@ -22,60 +22,76 @@ package external
 type TestInterface interface {
 
 	// ---------- Node / VM ----------
-
-	// Does the cloud support checking node existence?
-	// If supported, does the node exist?
-	NodeExists() (supported bool, exists bool)
-
-	// Does the cloud support checking shutdown state?
-	// If supported, is the node shutdown?
-	NodeIsShutdown() (supported bool, isShutdown bool)
-
-	// Does the cloud support returning node details?
-	// If supported, return node information
-	GetNodeDetails() (supported bool, details NodeDetails)
-
-	// Does the cloud support returning node addresses?
-	// If supported, return addresses
-	GetNodeAddresses() (supported bool, addresses []NodeAddress)
+	NodeLifecycle() (implemented bool, iface TestNodeLifecycleInterface)
 
 	// ---------- Load Balancer ----------
-
-	// Can the cloud create a load balancer?
-	CreateLoadBalancer() (supported bool, lb LoadBalancer)
-
-	// Can the cloud update a load balancer?
-	UpdateLoadBalancer() (supported bool, lb LoadBalancer)
-
-	// Can the cloud fetch load balancer state?
-	GetLoadBalancer() (supported bool, lb LoadBalancer)
-
-	// Can the cloud delete a load balancer?
-	DeleteLoadBalancer() (supported bool, deleted bool)
+	LoadBalancer() (implemented bool, iface TestLoadBalancerInterface)
 
 	// ---------- Networking ----------
-
-	// Can the cloud list routes?
-	ListRoutes() (supported bool, routes []Route)
-
-	// Can the cloud create a route?
-	CreateRoute() (supported bool, route Route)
-
-	// Can the cloud delete a route?
-	DeleteRoute() (supported bool, deleted bool)
+	Routes() (implemented bool, iface TestRoutesInterface)
 
 	// ---------- Topology ----------
-
-	// Can the cloud provide zone/region info?
-	GetZone() (supported bool, zone Zone)
+	Topology() (implemented bool, iface TestTopologyInterface)
 
 	// ---------- Cluster ----------
+	Cluster() (implemented bool, iface TestClusterInterface)
+}
 
-	// Can the cloud list clusters?
-	ListClusters() (supported bool, clusters []string)
+// TestNodeLifecycleInterface provides node/VM lifecycle testing operations
+type TestNodeLifecycleInterface interface {
+	// Exists checks if the node exists in the cloud
+	Exists() bool
 
-	// Can the cloud return a cluster endpoint?
-	GetClusterEndpoint() (supported bool, endpoint string)
+	// IsShutdown checks if the node is shutdown
+	IsShutdown() bool
+
+	// Details returns node information
+	Details() NodeDetails
+
+	// Addresses returns node addresses
+	Addresses() []NodeAddress
+}
+
+// TestLoadBalancerInterface provides load balancer testing operations
+type TestLoadBalancerInterface interface {
+	// Create creates a load balancer
+	Create() LoadBalancer
+
+	// Update updates a load balancer
+	Update() LoadBalancer
+
+	// Get fetches load balancer state
+	Get() LoadBalancer
+
+	// Delete deletes a load balancer
+	Delete() bool
+}
+
+// TestRoutesInterface provides network routing testing operations
+type TestRoutesInterface interface {
+	// List lists routes
+	List() []Route
+
+	// Create creates a route
+	Create() Route
+
+	// Delete deletes a route
+	Delete() bool
+}
+
+// TestTopologyInterface provides topology testing operations
+type TestTopologyInterface interface {
+	// GetZone provides zone/region info
+	GetZone() Zone
+}
+
+// TestClusterInterface provides cluster-level testing operations
+type TestClusterInterface interface {
+	// List lists clusters
+	List() []string
+
+	// GetEndpoint returns a cluster endpoint
+	GetEndpoint() string
 }
 
 // NodeDetails contains information about a node/VM
