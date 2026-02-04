@@ -16,42 +16,30 @@ limitations under the License.
 
 package external
 
+type TestNodeLifecycleInterface interface {
+	Exists() bool
+	IsShutdown() bool
+	Details() NodeDetails
+	Addresses() []NodeAddress
+}
+
+type TestLoadBalancerInterface interface {
+	Create() LoadBalancer
+	Update() LoadBalancer
+	Get() LoadBalancer
+	Delete() LoadBalancer
+}
+
 // TestInterface provides a cloud-agnostic testing interface for cloud providers
 // to implement in their repositories. This enables standardized testing across
 // different cloud provider implementations.
 type TestInterface interface {
 
 	// ---------- Node / VM ----------
-
-	// Does the cloud support checking node existence?
-	// If supported, does the node exist?
-	NodeExists() (supported bool, exists bool)
-
-	// Does the cloud support checking shutdown state?
-	// If supported, is the node shutdown?
-	NodeIsShutdown() (supported bool, isShutdown bool)
-
-	// Does the cloud support returning node details?
-	// If supported, return node information
-	GetNodeDetails() (supported bool, details NodeDetails)
-
-	// Does the cloud support returning node addresses?
-	// If supported, return addresses
-	GetNodeAddresses() (supported bool, addresses []NodeAddress)
+	NodeLifecycle() (implemented bool, iface TestNodeLifecycleInterface)
 
 	// ---------- Load Balancer ----------
-
-	// Can the cloud create a load balancer?
-	CreateLoadBalancer() (supported bool, lb LoadBalancer)
-
-	// Can the cloud update a load balancer?
-	UpdateLoadBalancer() (supported bool, lb LoadBalancer)
-
-	// Can the cloud fetch load balancer state?
-	GetLoadBalancer() (supported bool, lb LoadBalancer)
-
-	// Can the cloud delete a load balancer?
-	DeleteLoadBalancer() (supported bool, deleted bool)
+	LoadBalancer() (implemented bool, iface TestLoadBalancerInterface)
 
 	// ---------- Networking ----------
 
