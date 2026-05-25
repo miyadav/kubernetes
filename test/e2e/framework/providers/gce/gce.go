@@ -17,11 +17,29 @@ limitations under the License.
 package gce
 
 import (
+	cloudprovidertesting "k8s.io/cloud-provider/testing"
 	"k8s.io/kubernetes/test/e2e/framework"
 )
 
 func init() {
 	framework.RegisterProvider("gce", newProvider)
+	cloudprovidertesting.RegisterCapabilities("gce", &cloudprovidertesting.MapCapabilities{
+		Name: "gce",
+		Caps: map[cloudprovidertesting.Capability]bool{
+			cloudprovidertesting.CapLoadBalancer:         true,
+			cloudprovidertesting.CapInstances:            true,
+			cloudprovidertesting.CapInstancesV2:          true,
+			cloudprovidertesting.CapZones:                true,
+			cloudprovidertesting.CapRoutes:               true,
+			cloudprovidertesting.CapClusters:             false,
+			cloudprovidertesting.CapNodeDeletion:         true,
+			cloudprovidertesting.CapSSHAccess:            true,
+			cloudprovidertesting.CapInternalLoadBalancer: true,
+			cloudprovidertesting.CapVolumeProvisioning:   true,
+			cloudprovidertesting.CapNodeResize:           true,
+			cloudprovidertesting.CapTopologyLabels:       true,
+		},
+	})
 }
 
 func newProvider() (framework.ProviderInterface, error) {

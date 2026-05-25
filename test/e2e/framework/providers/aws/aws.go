@@ -17,11 +17,29 @@ limitations under the License.
 package aws
 
 import (
+	cloudprovidertesting "k8s.io/cloud-provider/testing"
 	"k8s.io/kubernetes/test/e2e/framework"
 )
 
 func init() {
 	framework.RegisterProvider("aws", newProvider)
+	cloudprovidertesting.RegisterCapabilities("aws", &cloudprovidertesting.MapCapabilities{
+		Name: "aws",
+		Caps: map[cloudprovidertesting.Capability]bool{
+			cloudprovidertesting.CapLoadBalancer:         true,
+			cloudprovidertesting.CapInstances:            true,
+			cloudprovidertesting.CapInstancesV2:          true,
+			cloudprovidertesting.CapZones:                true,
+			cloudprovidertesting.CapRoutes:               true,
+			cloudprovidertesting.CapClusters:             false,
+			cloudprovidertesting.CapNodeDeletion:         true,
+			cloudprovidertesting.CapSSHAccess:            true,
+			cloudprovidertesting.CapInternalLoadBalancer: true,
+			cloudprovidertesting.CapVolumeProvisioning:   true,
+			cloudprovidertesting.CapNodeResize:           false,
+			cloudprovidertesting.CapTopologyLabels:       true,
+		},
+	})
 }
 
 func newProvider() (framework.ProviderInterface, error) {

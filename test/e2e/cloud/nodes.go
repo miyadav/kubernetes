@@ -24,6 +24,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	clientset "k8s.io/client-go/kubernetes"
+	cloudprovidertesting "k8s.io/cloud-provider/testing"
 	"k8s.io/kubernetes/test/e2e/feature"
 	"k8s.io/kubernetes/test/e2e/framework"
 	e2enode "k8s.io/kubernetes/test/e2e/framework/node"
@@ -40,9 +41,10 @@ var _ = SIGDescribe(feature.CloudProvider, framework.WithDisruptive(), "Nodes", 
 	var c clientset.Interface
 
 	ginkgo.BeforeEach(func() {
-		// Only supported in AWS/GCE because those are the only cloud providers
-		// where E2E test are currently running.
+		// Kept for backward compatibility during transition; will be removed
+		// once all providers register capabilities via cloudprovidertesting.
 		e2eskipper.SkipUnlessProviderIs("aws", "gce")
+		e2eskipper.SkipUnlessCloudCapability(cloudprovidertesting.CapNodeDeletion)
 		c = f.ClientSet
 	})
 
